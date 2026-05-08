@@ -5,11 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <arpa/inet.h>
 #include <sys/stat.h>
+#include <sys/un.h>
+#include <stdatomic.h>
+#include <sys/socket.h>
 
 typedef uint8_t  u8;
 typedef int8_t   i8;
@@ -27,5 +30,14 @@ typedef ssize_t  isize;
 #define KB(n) (1024 * (n))
 #define MB(n) (1024 * 1024 * (n))
 #define GB(n) (1024 * 1024 * 1024 * (n))
+
+#define UNIX_SOCK_ADDR "/tmp/ndds"
+
+typedef enum {
+    DISCONN,
+    SUB,
+    UNSUB,
+    PUB
+} ClientActions_t;
 
 #endif
