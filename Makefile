@@ -1,33 +1,45 @@
-CC ?= gcc
+CC := gcc
 PROFILE ?= DEBUG
-
-CCFLAGS_DEBUG := -ggdb -O0 -fno-builtin -DDEBUG
-CCFLAGS_RELEASE := -Ofast
 
 SRC_DIR := src
 INC_DIR := include
-OBJ_DIR := obj
+OBJ_DIR := build/obj
+TGT_DIR := build/target
 
 SRCS := $(wildcard $(SRC_DIR)/*.c)
 OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-CCFLAGS += $(CCFLAGS_$(PROFILE)) -I$(INC_DIR) -Wall -Wextra -std=c99
-LDFLAGS += -lc -lcheck
+CFLAGS_DEBUG := -ggdb -O0 -fno-builtin -DDEBUG
+CFLAGS_RELEASE := -O2
 
-BIN := ndds
+INCLUDES += -I$(INC_DIR)
+CFLAGS += $(CFLAGS_$(PROFILE)) -std=c99 -Wall -Wextra
+LDFLAGS += -lcheck
 
-all: prebuild $(BIN)
+BIN := $(TGT_DIR)/ndds
 
-prebuild:
-	@mkdir -p $(OBJ_DIR)
+# Default goal
+all: $(BIN)
 
+# Clean obj files and binary
 clean:
-	rm -rf $(BIN) $(OBJ_DIR)/*.o
+	rm -rf $(OBJ_DIR)/*
+	rm -rf $(TGT_DIR)/*
 
+# Clean -> build
+rebuild: clean all
+
+# Create dependent build directories
+prebuild:
+	mkdir -p $(OBJ_DIR)
+	mkdir -p $(TGT_DIR)
+
+# Binary goal
 $(BIN): $(OBJS)
-	$(CC) $^ -o $@ $(LDFLAGS)
+	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
-	$(CC) $(CCFLAGS) -c $< -o $@
+# Intermediate obj files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | prebuild
+	$(CC) $(INCLUDES) $(CFLAGS) -c $< -o $@
 
-.PHONY: all prebuild clean
+.PHONY: all clean rebuild prebuild
